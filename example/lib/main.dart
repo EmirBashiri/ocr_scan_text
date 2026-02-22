@@ -35,7 +35,7 @@ class _MyAppState extends State<MyApp> {
       ocrTextResult: (ocrTextResult) {
         ocrTextResult.mapResult.forEach((module, result) {});
       },
-      scanModules: [ScanAllModule()],
+      scanModules: [ScanAllModule()..start()],
     );
   }
 }

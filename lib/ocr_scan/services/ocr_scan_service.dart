@@ -1,18 +1,11 @@
-import 'dart:io';
 import 'dart:ui' as ui show Image;
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart'
     as ml_kit;
-import 'package:image/image.dart' as img;
-import 'package:image_picker/image_picker.dart';
 import 'package:ocr_scan_text/ocr_scan/model/scan_match_counter.dart';
-import 'package:path/path.dart' as path;
-import 'package:pdf_render/pdf_render.dart';
 
 import '../../ocr_scan_text.dart';
-import '../helper/pdf_helper.dart';
 import '../render/scan_renderer.dart';
 
 enum Mode {
@@ -31,126 +24,6 @@ class OcrScanService {
   OcrScanService(
     this.scanModules,
   );
-
-  Future<OcrTextRecognizerResult?> startScanWithPhoto() async {
-    // FilePicker don't work with iOS LivePhoto
-    final ImagePicker picker = ImagePicker();
-    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
-    if (file == null) {
-      return null;
-    }
-
-    return startScanProcess(File(file.path));
-  }
-
-  Future<OcrTextRecognizerResult?> startScanWithOpenFile() async {
-    return _startStaticScanProcess(
-      await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowCompression: false,
-        allowMultiple: false,
-        allowedExtensions: [
-          'png',
-          'jpg',
-          'jpeg',
-          'pdf',
-        ],
-      ),
-    );
-  }
-
-  Future<OcrTextRecognizerResult?> _startStaticScanProcess(
-      FilePickerResult? result) async {
-    if (result == null) {
-      return null;
-    }
-    String? path = result.files.first.path;
-    if (path == null) {
-      return null;
-    }
-    return await startScanProcess(
-      File(path),
-    );
-  }
-
-  Future<OcrTextRecognizerResult?> startScanProcess(
-    File file,
-  ) async {
-    String extension = path.extension(file.path).toLowerCase();
-
-    assert(extension == '.pdf' ||
-        extension == '.png' ||
-        extension == '.jpg' ||
-        extension == '.jpeg');
-    if (extension == '.pdf') {
-      final PdfDocument document = await PdfDocument.openFile(
-        file.path,
-      );
-      return await _processStaticPDF(
-        document,
-        scanModules,
-      );
-    } else if (extension == '.png' ||
-        extension == '.jpg' ||
-        extension == '.jpeg') {
-      return await _processStaticImage(
-        file,
-        scanModules,
-      );
-    }
-    return null;
-  }
-
-// Process image from camera stream
-  Future<OcrTextRecognizerResult?> _processStaticPDF(
-    PdfDocument pdfDocument,
-    List<ScanModule> scanModules,
-  ) async {
-    ImagePDF? imagePDF = await PDFHelper.convertToPDFImage(pdfDocument);
-    if (imagePDF == null) {
-      return null;
-    }
-
-    ui.Image background =
-        await decodeImageFromList(await imagePDF.file.readAsBytes());
-
-    return await processImage(
-      ml_kit.InputImage.fromFilePath(imagePDF.file.path),
-      Size(
-        background.width.toDouble(),
-        background.height.toDouble(),
-      ),
-      background,
-      Mode.static,
-      scanModules,
-      null,
-    );
-  }
-
-  Future<OcrTextRecognizerResult?> _processStaticImage(
-    File file,
-    List<ScanModule> scanModules,
-  ) async {
-    final cmd = img.Command()..decodeImageFile(file.path);
-    await cmd.executeThread();
-    img.Image? image = cmd.outputImage;
-    if (image == null) {
-      return null;
-    }
-    ui.Image background = await decodeImageFromList(await file.readAsBytes());
-
-    return await processImage(
-      ml_kit.InputImage.fromFilePath(file.path),
-      Size(
-        image.width.toDouble(),
-        image.height.toDouble(),
-      ),
-      background,
-      Mode.static,
-      scanModules,
-      null,
-    );
-  }
 
   /// Launch the search for results from the image for all the modules started
   Future<OcrTextRecognizerResult?> processImage(
