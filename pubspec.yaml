@@ -1,6 +1,6 @@
 name: ocr_scan_text
 description: OCR Scan Text is a wrapper around the "Google ML kit Text Recognition" library.
-version: 2.0.0
+version: 2.0.1
 homepage: https://github.com/emirbashiri/ocr_scan_text
 
 environment:
