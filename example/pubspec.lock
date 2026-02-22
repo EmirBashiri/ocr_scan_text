@@ -155,14 +155,14 @@ packages:
       name: google_mlkit_commons
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0"
+    version: "0.7.1"
   google_mlkit_text_recognition:
     dependency: transitive
     description:
       name: google_mlkit_text_recognition
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.1"
+    version: "0.12.1"
   image:
     dependency: transitive
     description:
@@ -211,7 +211,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "2.0.0"
+    version: "2.0.1"
   path:
     dependency: transitive
     description:
